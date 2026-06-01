@@ -1,0 +1,11 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/backtest/page": "app/backtest/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/domestic/page": "app/domestic/page.js",
+  "/news-radar/page": "app/news-radar/page.js",
+  "/overseas/page": "app/overseas/page.js",
+  "/page": "app/page.js",
+  "/stocks/[ticker]/page": "app/stocks/[ticker]/page.js",
+  "/watchlist/page": "app/watchlist/page.js"
+}
