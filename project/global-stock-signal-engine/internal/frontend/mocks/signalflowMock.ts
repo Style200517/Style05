@@ -1,0 +1,512 @@
+import type {
+  BacktestData,
+  CandidateRow,
+  CandlePoint,
+  DashboardData,
+  FilterOption,
+  KpiMetric,
+  LineSeries,
+  MarketTickerItem,
+  NewsItem,
+  ScreenerPageData,
+  SectorStrengthRow,
+  SignalRow,
+  SidebarListItem,
+  UserProfile,
+  WatchlistData,
+  NewsRadarData,
+  NavKey
+} from "@/lib/signalflowTypes";
+
+const user: UserProfile = { name: "김신호 님", avatarLabel: "김" };
+
+const sparkUp = [33, 36, 34, 42, 45, 41, 52, 57, 54, 61, 66, 64, 72];
+const sparkSoftUp = [41, 43, 42, 45, 47, 46, 50, 53, 51, 56, 58, 59, 61];
+const sparkDown = [66, 63, 65, 61, 58, 57, 54, 56, 52, 50, 47, 45, 43];
+const sparkMixed = [51, 49, 53, 55, 52, 56, 54, 57, 55, 58, 57, 60, 59];
+
+const sharedTickers: MarketTickerItem[] = [
+  { id: "kospi", label: "KOSPI", value: "2,689.65", change: "18.42", changePercent: "+0.69%", direction: "up", sparkline: sparkUp },
+  { id: "kosdaq", label: "KOSDAQ", value: "867.34", change: "6.21", changePercent: "+0.72%", direction: "up", sparkline: sparkSoftUp },
+  { id: "sp500", label: "S&P 500", value: "5,312.03", change: "34.43", changePercent: "+0.65%", direction: "up", sparkline: sparkMixed },
+  { id: "nasdaq", label: "NASDAQ", value: "16,920.79", change: "126.23", changePercent: "+0.75%", direction: "up", sparkline: sparkUp },
+  { id: "usdkrw", label: "USD/KRW", value: "1,372.50", change: "5.30", changePercent: "-0.38%", direction: "down", sparkline: sparkDown }
+];
+
+const domesticTickers: MarketTickerItem[] = [
+  sharedTickers[0],
+  sharedTickers[1],
+  { id: "kospi200", label: "코스피200", value: "358.12", change: "2.15", changePercent: "+0.60%", direction: "up", sparkline: sparkSoftUp },
+  { id: "kosdaq150", label: "코스닥150", value: "1,398.27", change: "9.73", changePercent: "+0.70%", direction: "up", sparkline: sparkUp },
+  sharedTickers[4]
+];
+
+const overseasTickers: MarketTickerItem[] = [
+  sharedTickers[2],
+  sharedTickers[3],
+  { id: "dow", label: "DOW", value: "39,872.99", change: "173.18", changePercent: "+0.44%", direction: "up", sparkline: sparkSoftUp },
+  { id: "russell", label: "RUSSELL 2000", value: "2,102.45", change: "16.82", changePercent: "+0.81%", direction: "up", sparkline: sparkUp },
+  sharedTickers[4]
+];
+
+const krRows: SignalRow[] = [
+  row(1, "삼성전자", "005930", "KOSPI", "81,600", "+1.24%", "23,610억", "486조", 87, "+12.4%", "medium", "87%", "strong_watch"),
+  row(2, "SK하이닉스", "000660", "KOSPI", "196,800", "+1.29%", "21,540억", "143조", 87, "+15.7%", "medium", "89%", "strong_watch"),
+  row(3, "현대차", "005380", "KOSPI", "236,000", "-0.21%", "14,830억", "49조", 78, "+9.3%", "medium", "83%", "watch"),
+  row(4, "LG에너지솔루션", "373220", "KOSPI", "402,500", "+2.29%", "12,950억", "94조", 76, "+14.8%", "medium", "82%", "strong_watch"),
+  row(5, "NAVER", "035420", "KOSPI", "193,700", "-0.21%", "9,680억", "31조", 72, "+8.9%", "medium", "79%", "watch"),
+  row(6, "카카오", "035720", "KOSPI", "49,850", "+0.66%", "8,120억", "22조", 68, "+7.2%", "high", "72%", "risk"),
+  row(7, "셀트리온", "068270", "KOSPI", "182,600", "+1.56%", "7,530억", "39조", 66, "+11.2%", "medium", "78%", "watch"),
+  row(8, "삼성바이오로직스", "207940", "KOSPI", "801,000", "-0.37%", "6,210억", "57조", 64, "+6.3%", "low", "81%", "watch"),
+  row(9, "포스코홀딩스", "005490", "KOSPI", "354,000", "+0.57%", "5,980억", "31조", 62, "+6.9%", "medium", "75%", "watch"),
+  row(10, "한화에어로스페이스", "012450", "KOSPI", "381,500", "+1.32%", "5,420억", "17조", 61, "+10.1%", "medium", "76%", "watch"),
+  row(11, "기아", "000270", "KOSPI", "94,850", "-0.42%", "4,970억", "37조", 60, "+7.0%", "medium", "74%", "watch"),
+  row(12, "에코프로비엠", "247540", "KOSDAQ", "189,700", "+1.71%", "4,560억", "18조", 59, "+12.0%", "high", "71%", "risk")
+];
+
+const usRows: SignalRow[] = [
+  row(1, "엔비디아", "NVDA", "NASDAQ", "124.56", "+2.45%", "28.4B", "3.05T", 87, "+17.2%", "high", "89%", "strong_watch"),
+  row(2, "마이크로소프트", "MSFT", "NASDAQ", "424.18", "+1.12%", "20.1B", "3.15T", 84, "+13.6%", "medium", "88%", "strong_watch"),
+  row(3, "애플", "AAPL", "NASDAQ", "195.62", "+0.89%", "16.7B", "3.00T", 82, "+11.8%", "medium", "85%", "watch"),
+  row(4, "아마존", "AMZN", "NASDAQ", "187.61", "+1.34%", "14.2B", "1.96T", 78, "+15.1%", "medium", "82%", "watch"),
+  row(5, "알파벳 A", "GOOGL", "NASDAQ", "167.78", "+0.73%", "11.6B", "2.08T", 76, "+12.9%", "medium", "82%", "watch"),
+  row(6, "메타 플랫폼스", "META", "NASDAQ", "495.24", "+2.18%", "11.3B", "1.26T", 74, "+16.4%", "high", "81%", "watch"),
+  row(7, "테슬라", "TSLA", "NASDAQ", "252.41", "-1.25%", "18.9B", "805.2B", 68, "+9.3%", "high", "76%", "risk"),
+  row(8, "AMD", "AMD", "NASDAQ", "157.89", "+1.86%", "7.8B", "254.6B", 66, "+14.2%", "high", "73%", "watch"),
+  row(9, "브로드컴", "AVGO", "NASDAQ", "1,526.33", "+1.01%", "6.9B", "710.1B", 64, "+12.3%", "medium", "74%", "watch"),
+  row(10, "일라이릴리", "LLY", "NYSE", "816.29", "+0.55%", "6.2B", "775.6B", 62, "+10.7%", "medium", "72%", "watch"),
+  row(11, "JP모건 체이스", "JPM", "NYSE", "198.74", "+0.63%", "7.1B", "587.5B", 60, "+8.6%", "medium", "71%", "watch"),
+  row(12, "팔란티어 테크", "PLTR", "NYSE", "23.18", "-0.86%", "5.4B", "48.7B", 58, "+13.1%", "high", "64%", "risk")
+];
+
+const candidateRows: CandidateRow[] = krRows.slice(0, 10).map((item) => ({
+  rank: item.rank,
+  name: item.name,
+  ticker: item.ticker,
+  score: item.score,
+  expectedReturn: item.expectedReturn,
+  riskLevel: item.riskLevel,
+  confidence: item.confidence
+}));
+
+const featuredCandles: CandlePoint[] = [
+  candle("04/19", 168, 172, 165, 170, 120),
+  candle("04/26", 171, 176, 169, 175, 150),
+  candle("05/03", 174, 180, 172, 178, 142),
+  candle("05/10", 176, 183, 174, 181, 168),
+  candle("05/17", 181, 187, 178, 184, 171),
+  candle("05/24", 182, 190, 181, 188, 195),
+  candle("05/31", 187, 193, 184, 191, 210),
+  candle("06/07", 190, 198, 188, 196, 230),
+  candle("06/14", 194, 204, 193, 201, 260),
+  candle("06/21", 199, 207, 196, 203, 244),
+  candle("06/28", 201, 205, 197, 199, 218),
+  candle("07/05", 198, 204, 196, 202, 190),
+  candle("07/12", 201, 206, 199, 204, 201)
+];
+
+const newsRows: NewsItem[] = [
+  news("n1", "호재", "SK하이닉스, HBM3E 공급 확대 전망", "SK하이닉스", "국내", 87, "연합뉴스", "10분 전", "주목"),
+  news("n2", "공시", "LG에너지솔루션, 2분기 잠정 영업익 공시", "LG에너지솔루션", "국내", 82, "DART", "24분 전", "확인"),
+  news("n3", "악재", "테슬라, 유럽 판매 둔화 우려 확대", "테슬라", "해외", 79, "블룸버그", "31분 전", "경계"),
+  news("n4", "수급", "외국인, 반도체 업종 3거래일 연속 수급 개선", "삼성전자 외", "국내", 76, "한국경제", "42분 전", "주목"),
+  news("n5", "호재", "엔비디아 목표가 상향, AI 수요 지속 전망", "엔비디아", "해외", 84, "로이터", "55분 전", "주목"),
+  news("n6", "실적", "마이크로소프트 클라우드 성장률 기대 상회 전망", "마이크로소프트", "해외", 74, "CNBC", "1시간 전", "관찰"),
+  news("n7", "매크로", "미 연준 금리 인하 기대감 확대", "나스닥 주요주", "해외", 71, "WSJ", "1시간 전", "관찰"),
+  news("n8", "악재", "카카오, 플랫폼 광고 성장 둔화 우려", "카카오", "국내", 67, "머니투데이", "1시간 전", "경계"),
+  news("n9", "공시", "현대차, 글로벌 판매 증가 공시", "현대차", "국내", 65, "DART", "1시간 전", "확인"),
+  news("n10", "호재", "TSMC 실적 호조에 반도체 장비주 동반 강세", "반도체 장비주", "해외", 73, "니케이", "2시간 전", "관찰"),
+  news("n11", "수급", "기관, 2차전지 대형주 비중 확대", "LG에너지솔루션 외", "국내", 62, "매일경제", "2시간 전", "관찰"),
+  news("n12", "매크로", "원/달러 환율 하락, 외국인 수급 개선 기대", "코스피 대형주", "국내", 60, "서울경제", "2시간 전", "관찰")
+];
+
+const sectorRows: SectorStrengthRow[] = [
+  sector("반도체", 82, "+2.31%", sparkUp, "up"),
+  sector("자동차", 78, "+1.68%", sparkSoftUp, "up"),
+  sector("2차전지", 73, "+1.34%", sparkUp, "up"),
+  sector("바이오", 66, "+0.92%", sparkSoftUp, "up"),
+  sector("인터넷", 63, "-0.21%", sparkDown, "down"),
+  sector("금융", 58, "-0.35%", sparkDown, "down"),
+  sector("철강/금속", 52, "-0.62%", sparkDown, "down"),
+  sector("유틸리티", 42, "-0.08%", sparkMixed, "flat")
+];
+
+const overseasSectorRows: SectorStrengthRow[] = [
+  sector("AI/반도체", 88, "+2.35%", sparkUp, "up"),
+  sector("클라우드", 82, "+1.68%", sparkSoftUp, "up"),
+  sector("헬스케어", 76, "+1.24%", sparkUp, "up"),
+  sector("전기차", 63, "-0.85%", sparkDown, "down"),
+  sector("금융", 58, "-0.32%", sparkDown, "down"),
+  sector("에너지", 52, "-0.61%", sparkDown, "down"),
+  sector("소비재", 49, "-0.41%", sparkDown, "down"),
+  sector("통신", 47, "-0.25%", sparkDown, "down")
+];
+
+const performanceSeries: LineSeries[] = [
+  { id: "strategy", label: "종합 점수 전략", tone: "orange", values: [0, 3, 4, 7, 6, 12, 14, 17, 20, 19, 24, 27, 32] },
+  { id: "benchmark", label: "벤치마크", tone: "gray", values: [0, 1, 2, 4, 5, 7, 8, 11, 10, 12, 15, 17, 18] }
+];
+
+const flowSeries: LineSeries[] = [
+  { id: "kospi", label: "KOSPI", tone: "orange", values: [0, 2, 3, 4, 5, 4, 6, 5, 6, 7, 8, 7] },
+  { id: "kosdaq", label: "KOSDAQ", tone: "blue", values: [0, 1, 2, 2, 3, 2, 4, 3, 4, 5, 5, 4] },
+  { id: "score", label: "전략 점수", tone: "green", values: [5, 7, 12, 10, 13, 11, 14, 13, 15, 16, 17, 18] }
+];
+
+const userWatchlist: SidebarListItem[] = [
+  { label: "삼성전자", value: "81,600", subValue: "+1.24%", tone: "positive" },
+  { label: "현대차", value: "236,000", subValue: "-0.21%", tone: "negative" },
+  { label: "NAVER", value: "193,700", subValue: "-0.21%", tone: "negative" },
+  { label: "LG에너지솔루션", value: "402,500", subValue: "+2.29%", tone: "positive" },
+  { label: "카카오", value: "49,850", subValue: "+0.60%", tone: "positive" }
+];
+
+const controlOptions = [
+  { label: "전체", value: "all" },
+  { label: "보통 이하", value: "normal" },
+  { label: "높음", value: "high" }
+];
+
+export function getDashboardMock(): DashboardData {
+  return {
+    tickers: sharedTickers,
+    user,
+    notificationCount: 5,
+    candidates: candidateRows,
+    featured: {
+      name: "SK하이닉스",
+      ticker: "000660",
+      price: "196,800",
+      change: "+2,500",
+      changePercent: "+1.29%",
+      score: 87,
+      confidence: "87%",
+      candles: featuredCandles,
+      scoreBreakdown: [
+        { label: "기술적 분석", value: 22, max: 25 },
+        { label: "수급 분석", value: 20, max: 25 },
+        { label: "이슈 모멘텀", value: 18, max: 25 },
+        { label: "실적 & 펀더멘털", value: 17, max: 25 },
+        { label: "시장 환경", value: 10, max: 25 }
+      ],
+      reasons: ["HBM 수요 지속 증가로 실적 개선 기대", "2분기 영업이익 컨센서스 상회 전망", "외국인·기관 수급 유입 지속", "AI 서버 투자 확대 수혜 지속"],
+      risks: ["메모리 가격 변동성 확대 가능성", "중국 반도체 규제 정책 경쟁 심화", "단기 급등에 따른 차익 실현 매물 출회 가능성", "글로벌 경기 둔화 시 수요 감소 우려"]
+    },
+    newsRadar: newsRows.slice(0, 4),
+    marketSummary: [
+      { label: "상승 종목", value: "781", delta: "(58%)", tone: "positive" },
+      { label: "보합 종목", value: "98", delta: "(7%)", tone: "neutral" },
+      { label: "하락 종목", value: "462", delta: "(35%)", tone: "negative" },
+      { label: "거래대금", value: "18.6조원", tone: "neutral" },
+      { label: "외국인 수급", value: "+2,312억원", tone: "positive" },
+      { label: "기관 수급", value: "+1,152억원", tone: "positive" }
+    ],
+    watchlist: userWatchlist,
+    backtestSeries: performanceSeries,
+    backtestMetrics: [
+      { label: "누적 수익률", value: "+32.45%", tone: "positive" },
+      { label: "KOSPI 대비", value: "+18.72%", tone: "positive" },
+      { label: "승률", value: "62.4%", tone: "neutral" },
+      { label: "최대 낙폭", value: "-9.31%", tone: "negative" },
+      { label: "샤프지수", value: "1.38", tone: "neutral" }
+    ],
+    sectorStrength: sectorRows.slice(0, 6)
+  };
+}
+
+export function getDomesticMock(): ScreenerPageData {
+  return screenerData("국내주식 스크리너", "조건에 맞는 국내 종목을 빠르게 탐색", domesticTickers, krRows, sectorRows, "domestic");
+}
+
+export function getOverseasMock(): ScreenerPageData {
+  return screenerData("해외주식 스크리너", "조건에 맞는 해외 종목을 빠르게 검색", overseasTickers, usRows, overseasSectorRows, "overseas");
+}
+
+export function getNewsRadarMock(): NewsRadarData {
+  return {
+    tickers: sharedTickers,
+    user,
+    notificationCount: 9,
+    filters: {
+      themePills: ["전체", "호재", "악재", "공시", "수급", "실적", "매크로", "AI", "반도체", "바이오", "자동차", "+ 키워드 추가"].map((label, index) => ({ label, active: index === 0 })),
+      controls: [
+        { label: "정렬 기준", value: "최신순", options: optionList(["최신순", "영향도순", "관련도순"]) },
+        { label: "시장", value: "전체", options: optionList(["전체", "국내", "해외"]) },
+        { label: "영향도", value: "전체", options: optionList(["전체", "70 이상", "80 이상"]) },
+        { label: "관련 종목", value: "전체", options: optionList(["전체", "관심종목", "보유그룹"]) },
+        { label: "출처", value: "전체", options: optionList(["전체", "DART", "SEC", "언론"]) },
+        { label: "시간대", value: "24시간", options: optionList(["24시간", "6시간", "1시간"]) }
+      ]
+    },
+    rows: newsRows,
+    summary: [
+      { label: "호재 뉴스 수", value: "128", delta: "(+14%)", tone: "positive" },
+      { label: "악재 뉴스 수", value: "74", delta: "(-2%)", tone: "negative" },
+      { label: "공시/보고서", value: "36", tone: "neutral" },
+      { label: "평균 영향도", value: "68.4", tone: "neutral" },
+      { label: "주요 시장 반응", value: "+1.12%", tone: "positive" },
+      { label: "실시간 알림", value: "18건", tone: "warning" }
+    ],
+    clusters: overseasSectorRows.slice(0, 5),
+    alerts: newsRows.slice(0, 5),
+    interestNews: newsRows.slice(3, 8),
+    issueMap: [...overseasSectorRows.slice(0, 5), ...sectorRows.slice(4, 8)],
+    newsFlow: [
+      { id: "good", label: "호재 비중", tone: "orange", values: [0, 2, 5, 7, 6, 8, 7, 8, 10, 9, 11] },
+      { id: "bad", label: "악재 비중", tone: "blue", values: [0, 1, 2, 4, 3, 4, 5, 4, 5, 6, 7] },
+      { id: "score", label: "전략 점수", tone: "green", values: [5, 8, 13, 11, 14, 13, 16, 15, 17, 18, 20] }
+    ],
+    flowMetrics: [
+      { label: "평균 뉴스 점수", value: "63.8", tone: "primary" },
+      { label: "호재 비중", value: "+12.4%", tone: "positive" },
+      { label: "악재 비중", value: "-4.1%", tone: "negative" }
+    ]
+  };
+}
+
+export function getShellMock(nav: NavKey | null = "dashboard") {
+  const navKey = nav ?? "dashboard";
+  const tickersByNav: Record<NavKey, MarketTickerItem[]> = {
+    dashboard: sharedTickers,
+    domestic: domesticTickers,
+    overseas: overseasTickers,
+    "news-radar": sharedTickers,
+    backtest: sharedTickers,
+    watchlist: sharedTickers
+  };
+
+  return {
+    tickers: tickersByNav[navKey],
+    user,
+    notificationCount: navKey === "dashboard" ? 5 : 9
+  };
+}
+
+export function getBacktestMock(): BacktestData {
+  return {
+    tickers: sharedTickers,
+    user,
+    notificationCount: 9,
+    controls: [
+      { label: "전략", value: "종합 점수 전략", options: optionList(["종합 점수 전략", "가격 기반", "뉴스 통합"]) },
+      { label: "시장", value: "국내+해외", options: optionList(["국내+해외", "국내", "해외"]) },
+      { label: "벤치마크", value: "KOSPI + S&P 500", options: optionList(["KOSPI + S&P 500", "KOSPI", "S&P 500"]) },
+      { label: "기간", value: "2023.01 - 2024.07", options: optionList(["2023.01 - 2024.07", "2024 YTD", "최근 1년"]) },
+      { label: "보유기간", value: "5거래일", options: optionList(["5거래일", "10거래일", "20거래일"]) },
+      { label: "리밸런싱", value: "주간", options: optionList(["주간", "월간"]) },
+      { label: "수수료", value: "반영", options: optionList(["반영", "미반영"]) }
+    ],
+    equityCurve: performanceSeries,
+    drawdown: [{ id: "drawdown", label: "드로다운", tone: "orange", values: [0, -2, -1, -6, -2, -1, -9, -5, -3, -12, -6, -2, -7, -1] }],
+    summary: {
+      metrics: [
+        { label: "누적 수익률", value: "+32.8%", tone: "positive" },
+        { label: "벤치마크 대비", value: "+18.4%", tone: "positive" },
+        { label: "승률", value: "62.7%", tone: "neutral" },
+        { label: "최대 낙폭 (MDD)", value: "-9.1%", tone: "negative" },
+        { label: "샤프지수", value: "1.42", tone: "neutral" },
+        { label: "거래 횟수", value: "184", tone: "neutral" }
+      ],
+      composition: [
+        { label: "기술적", value: 30, max: 100 },
+        { label: "수급", value: 20, max: 100 },
+        { label: "이슈", value: 20, max: 100 },
+        { label: "실적", value: 15, max: 100 },
+        { label: "시장환경", value: 15, max: 100 }
+      ],
+      conditions: [
+        { label: "최소 거래대금", value: "100억원 이상" },
+        { label: "종목 수", value: "상위 50개" },
+        { label: "손절 기준", value: "-7%" },
+        { label: "익절 기준", value: "+10%" },
+        { label: "상장폐지 제외 여부", value: "제외" },
+        { label: "수수료 포함 여부", value: "포함 (0.05%)" }
+      ],
+      runHistory: [
+        { label: "2024-07-15 15:30", value: "완료", subValue: "+32.8%", tone: "positive" },
+        { label: "2024-07-15 15:00", value: "완료", subValue: "+31.2%", tone: "positive" },
+        { label: "2024-07-15 14:30", value: "완료", subValue: "+29.7%", tone: "positive" },
+        { label: "2024-07-15 14:00", value: "완료", subValue: "+28.1%", tone: "positive" },
+        { label: "2024-07-15 13:30", value: "실행중", subValue: "-", tone: "info" }
+      ],
+      monthlyReturns: [
+        { year: "2024", jan: "+1.9%", feb: "+2.8%", mar: "+3.1%", apr: "-1.2%", may: "+2.6%", jun: "+1.4%", jul: "+2.5%", total: "+13.5%" },
+        { year: "2023", jan: "+2.2%", feb: "-1.0%", mar: "+1.5%", apr: "+2.3%", may: "-0.8%", jun: "+2.0%", jul: "+1.8%", total: "+17.6%" }
+      ],
+      riskMetrics: [
+        { label: "변동성 (연환산)", value: "13.6%" },
+        { label: "손익비 (평균)", value: "1.88" },
+        { label: "평균 보유일", value: "5.1일" },
+        { label: "Profit Factor", value: "1.63" },
+        { label: "CAGR (연환산)", value: "21.4%" },
+        { label: "MDD (최대 낙폭)", value: "-9.1%", tone: "negative" }
+      ],
+      annualSeries: [
+        { year: "2023년", strategy: 17.6, benchmark: 5.3 },
+        { year: "2024년 YTD", strategy: 13.5, benchmark: 3.7 }
+      ],
+      trades: [
+        trade("삼성전자", "KOSPI", "2024-07-02", "2024-07-10", "81,300", "85,200", "+4.80%", "6일", "익절"),
+        trade("SK하이닉스", "KOSPI", "2024-06-24", "2024-07-09", "196,800", "207,500", "+5.42%", "11일", "익절"),
+        trade("엔비디아", "NASDAQ", "2024-06-18", "2024-07-05", "126.45", "137.98", "+9.12%", "12일", "익절"),
+        trade("마이크로소프트", "NASDAQ", "2024-06-10", "2024-06-27", "415.30", "425.10", "+2.36%", "11일", "익절"),
+        trade("테슬라", "NASDAQ", "2024-05-20", "2024-06-14", "188.35", "173.60", "-7.83%", "17일", "손절")
+      ]
+    }
+  };
+}
+
+export function getWatchlistMock(): WatchlistData {
+  return {
+    tickers: sharedTickers,
+    user,
+    notificationCount: 9,
+    controls: [
+      { label: "관심 그룹", value: "전체 그룹", options: optionList(["전체 그룹", "국내 대형주", "AI/반도체", "단기 모니터링"]) },
+      { label: "시장", value: "전체", options: optionList(["전체", "국내", "해외"]) },
+      { label: "신호 상태", value: "전체", options: optionList(["전체", "강한 관찰", "관찰", "주의"]) },
+      { label: "위험도", value: "전체", options: optionList(["전체", "낮음", "보통", "높음"]) },
+      { label: "알림 상태", value: "전체", options: optionList(["전체", "활성", "가격근접", "이슈발생", "OFF"]) },
+      { label: "정렬", value: "상승 가능성 점수", options: optionList(["상승 가능성 점수", "등락률", "위험도"]) }
+    ],
+    rows: [
+      watch(1, "삼성전자", "005930", "KOSPI", "81,500", "+1.22%", 87, "+12.4%", "low", "strong_watch", "활성", "D램 업황 개선"),
+      watch(2, "SK하이닉스", "000660", "KOSPI", "196,800", "+1.29%", 87, "+15.7%", "low", "strong_watch", "가격근접", "HBM 수요 지속"),
+      watch(3, "엔비디아", "NVDA", "NASDAQ", "126.33", "+0.75%", 86, "+13.6%", "high", "strong_watch", "활성", "Blackwell 출하 증가"),
+      watch(4, "테슬라", "TSLA", "NASDAQ", "179.28", "-0.62%", 78, "+9.8%", "high", "watch", "이슈발생", "FSD 업데이트 기대"),
+      watch(5, "현대차", "005380", "KOSPI", "226,100", "-0.21%", 76, "+9.3%", "medium", "watch", "OFF", "전기차 전환 가속"),
+      watch(6, "NAVER", "035420", "KOSPI", "193,700", "+0.21%", 72, "+8.9%", "medium", "watch", "활성", "AI 검색 모멘텀"),
+      watch(7, "마이크로소프트", "MSFT", "NASDAQ", "415.30", "+0.63%", 71, "+8.1%", "medium", "watch", "가격근접", "Azure 성장 지속"),
+      watch(8, "LG에너지솔루션", "373220", "KOSPI", "408,500", "-0.73%", 67, "+7.7%", "medium", "risk", "OFF", "ESS 수요 체크"),
+      watch(9, "알파벳 A", "GOOGL", "NASDAQ", "172.45", "+0.18%", 64, "+6.2%", "medium", "watch", "활성", "광고 회복세 확인"),
+      watch(10, "카카오", "035720", "KOSPI", "49,850", "-0.56%", 61, "+5.8%", "low", "risk", "이슈발생", "광고/커머스 개선 필요")
+    ],
+    summary: [
+      { label: "전체 종목 수", value: "42" },
+      { label: "강한 관찰 수", value: "12", tone: "info" },
+      { label: "주의 종목 수", value: "6", tone: "warning" },
+      { label: "실시간 알림", value: "8" },
+      { label: "평균 상승 가능성 점수", value: "67.4" },
+      { label: "평균 기대수익률", value: "+9.2%", tone: "positive" },
+      { label: "오늘 평균 등락률", value: "+0.32%", tone: "positive" }
+    ],
+    alerts: newsRows.slice(0, 5),
+    groups: [
+      { name: "국내 대형주", count: 12, strong: 3, risk: 2, alerts: 3 },
+      { name: "AI/반도체", count: 9, strong: 4, risk: 1, alerts: 2 },
+      { name: "전기차", count: 6, strong: 2, risk: 1, alerts: 1 },
+      { name: "배당/가치주", count: 8, strong: 1, risk: 1, alerts: 1 },
+      { name: "단기 모니터링", count: 7, strong: 2, risk: 1, alerts: 1 }
+    ],
+    performance: [
+      { id: "watch", label: "관심종목 평균", tone: "orange", values: [0, 3, 5, 8, 7, 10, 12, 11, 13, 14, 16] },
+      { id: "kospi", label: "KOSPI", tone: "gray", values: [0, -1, -2, -1, -3, -4, -3, -5, -4, -5, -4] },
+      { id: "nasdaq", label: "NASDAQ", tone: "blue", values: [0, 1, 2, 3, 4, 3, 5, 5, 6, 7, 8] }
+    ],
+    performanceMetrics: [
+      { label: "평균 수익률", value: "+6.34%", tone: "positive" },
+      { label: "승률", value: "64.3%" },
+      { label: "평균 보유일", value: "24.6일" }
+    ],
+    signalHistory: [
+      { name: "현대차", previousSignal: "risk", currentSignal: "watch", changedAt: "05-17 09:18", reason: "실적 개선 기대 반영" },
+      { name: "카카오", previousSignal: "watch", currentSignal: "risk", changedAt: "05-17 08:47", reason: "광고 성장 둔화 우려" },
+      { name: "마이크로소프트", previousSignal: "watch", currentSignal: "strong_watch", changedAt: "05-16 17:32", reason: "AI 매출 성장 가속" },
+      { name: "LG에너지솔루션", previousSignal: "risk", currentSignal: "watch", changedAt: "05-16 15:06", reason: "ESS 수요 회복 확인" },
+      { name: "SK하이닉스", previousSignal: "watch", currentSignal: "strong_watch", changedAt: "05-16 10:22", reason: "HBM 수급 타이트 지속" }
+    ],
+    priorityItems: [
+      { rank: 1, name: "SK하이닉스", ticker: "000660", signal: "strong_watch", price: "196,800", changePercent: "+1.29%", score: 87, memo: "HBM 수요 지속, 실적 상향 가능성" },
+      { rank: 2, name: "엔비디아", ticker: "NVDA", signal: "strong_watch", price: "126.33", changePercent: "+0.75%", score: 86, memo: "Blackwell 출하 증가, 데이터센터 수요 강세" },
+      { rank: 3, name: "테슬라", ticker: "TSLA", signal: "watch", price: "179.28", changePercent: "-0.62%", score: 78, memo: "FSD 업데이트 상향, 변동성 확인 필요" },
+      { rank: 4, name: "NAVER", ticker: "035420", signal: "watch", price: "193,700", changePercent: "+0.21%", score: 72, memo: "AI 검색 확장과 광고 회복 모멘텀" }
+    ]
+  };
+}
+
+function screenerData(title: string, subtitle: string, tickers: MarketTickerItem[], rows: SignalRow[], sectors: SectorStrengthRow[], type: "domestic" | "overseas"): ScreenerPageData {
+  const isDomestic = type === "domestic";
+  const themePills = isDomestic
+    ? ["전체", "KOSPI", "KOSDAQ", "대형주", "중소형주", "반도체", "2차전지", "바이오", "자동차", "+ 테마 추가"]
+    : ["전체", "미국", "나스닥", "뉴욕증권거래소", "대형기술주", "반도체", "AI", "전기차", "헬스케어", "금융", "+ 테마 추가"];
+
+  return {
+    tickers,
+    user,
+    notificationCount: 9,
+    title,
+    subtitle,
+    filters: {
+      themePills: themePills.map((label, index) => ({ label, active: index === 0 })),
+      controls: [
+        { label: "정렬 기준", value: "상승 가능성 점수", options: optionList(["상승 가능성 점수", "시가총액", "거래대금"]) },
+        { label: "시가총액", value: "전체", options: optionList(["전체", "대형", "중형", "소형"]) },
+        { label: "거래대금", value: "전체", options: optionList(["전체", "상위 20%", "상위 50%"]) },
+        { label: "위험도", value: "전체", options: controlOptions },
+        { label: "보유기간", value: "전체", options: optionList(["전체", "5거래일", "10거래일", "20거래일"]) }
+      ]
+    },
+    rows,
+    marketSummary: isDomestic
+      ? [
+          { label: "상승 종목 수", value: "781", delta: "(58%)", tone: "positive" },
+          { label: "하락 종목 수", value: "462", delta: "(34%)", tone: "negative" },
+          { label: "보합 종목 수", value: "102", delta: "(8%)", tone: "neutral" },
+          { label: "거래대금", value: "21조 8,430억", delta: "+12.3%", tone: "positive" },
+          { label: "외국인 수급", value: "+3,210억", tone: "positive" },
+          { label: "기관 수급", value: "+1,152억", tone: "positive" }
+        ]
+      : [
+          { label: "상승 종목 수", value: "5,826", delta: "(58%)", tone: "positive" },
+          { label: "하락 종목 수", value: "3,782", delta: "(38%)", tone: "negative" },
+          { label: "보합 종목 수", value: "392", delta: "(4%)", tone: "neutral" },
+          { label: "미국 거래대금", value: "98.4B USD", delta: "+18.7%", tone: "positive" },
+          { label: "빅테크 평균 등락률", value: "+1.21%", tone: "positive" },
+          { label: "AI 섹터 강도", value: "+2.35%", tone: "positive" }
+        ],
+    sectorStrength: sectors.slice(0, 5),
+    realtimeIssues: newsRows.slice(0, 4),
+    watchlist: isDomestic ? userWatchlist : userWatchlist.map((item, index) => ({ ...item, label: usRows[index]?.name ?? item.label, value: usRows[index]?.price ?? item.value })),
+    sectorMap: sectors,
+    marketFlow: isDomestic
+      ? flowSeries
+      : [
+          { id: "sp500", label: "S&P 500", tone: "orange", values: [0, 1, 3, 4, 6, 5, 7, 6, 8, 7, 9, 10] },
+          { id: "nasdaq", label: "NASDAQ", tone: "blue", values: [0, 2, 4, 6, 8, 7, 10, 9, 12, 11, 13, 14] },
+          { id: "score", label: "전략 점수", tone: "green", values: [5, 8, 10, 12, 16, 14, 17, 18, 20, 19, 21, 22] }
+        ],
+    flowMetrics: [
+      { label: "전략 점수(평균)", value: "63.2", tone: "primary" },
+      { label: isDomestic ? "KOSPI 등락률" : "S&P 500 등락률", value: "+3.21%", tone: "positive" },
+      { label: isDomestic ? "KOSDAQ 등락률" : "NASDAQ 등락률", value: isDomestic ? "-1.18%" : "+2.18%", tone: isDomestic ? "negative" : "positive" }
+    ]
+  };
+}
+
+function optionList(labels: string[]) {
+  return labels.map((label) => ({ label, value: label }));
+}
+
+function row(rank: number, name: string, ticker: string, market: string, price: string, changePercent: string, tradingValue: string, marketCap: string, score: number, expectedReturn: string, riskLevel: SignalRow["riskLevel"], confidence: string, signal: SignalRow["signal"]): SignalRow {
+  return { rank, name, ticker, market, price, changePercent, tradingValue, marketCap, score, expectedReturn, riskLevel, confidence, signal };
+}
+
+function candle(date: string, open: number, high: number, low: number, close: number, volume: number): CandlePoint {
+  return { date, open, high, low, close, volume };
+}
+
+function news(id: string, type: NewsItem["type"], title: string, relatedAsset: string, market: string, impactScore: number, source: string, publishedAt: string, status: NewsItem["status"]): NewsItem {
+  return { id, type, title, relatedAsset, market, impactScore, source, publishedAt, status };
+}
+
+function sector(sectorName: string, score: number, changePercent: string, sparkline: number[], direction: SectorStrengthRow["direction"]): SectorStrengthRow {
+  return { sector: sectorName, score, changePercent, sparkline, direction };
+}
+
+function trade(name: string, market: string, entryDate: string, exitDate: string, entryPrice: string, exitPrice: string, returnPercent: string, holdingDays: string, result: BacktestData["summary"]["trades"][number]["result"]) {
+  return { name, market, entryDate, exitDate, entryPrice, exitPrice, returnPercent, holdingDays, result };
+}
+
+function watch(rank: number, name: string, ticker: string, market: string, price: string, changePercent: string, score: number, expectedReturn: string, riskLevel: WatchlistData["rows"][number]["riskLevel"], signal: WatchlistData["rows"][number]["signal"], alertStatus: WatchlistData["rows"][number]["alertStatus"], memo: string) {
+  return { rank, name, ticker, market, price, changePercent, score, expectedReturn, riskLevel, signal, alertStatus, memo };
+}

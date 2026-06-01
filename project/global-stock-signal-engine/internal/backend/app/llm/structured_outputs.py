@@ -1,0 +1,7 @@
+from app.schemas.disclosure_schema import DisclosureEventClassification
+from app.schemas.news_schema import NewsEventClassification
+
+
+NEWS_EVENT_OUTPUT_SCHEMA = NewsEventClassification.model_json_schema()
+DISCLOSURE_EVENT_OUTPUT_SCHEMA = DisclosureEventClassification.model_json_schema()
+
